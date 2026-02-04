@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    container_name: doc2data_app
+    volumes:
+      - .:/app
+    environment:
+      # Use environment variables from .env file instead of hardcoding
+      - DATABASE_URL=postgresql://${DB_USER:-doc2data}:${DB_PASSWORD:-doc2data}@db:5432/${DB_NAME:-doc2data}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    container_name: doc2data_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-doc2data}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-doc2data}
+      POSTGRES_DB: ${DB_NAME:-doc2data}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-doc2data}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,0 +1,5 @@
+psycopg[binary]
+python-dotenv
+pytesseract
+pdf2image
+pillow
